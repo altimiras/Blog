@@ -72,8 +72,8 @@
         }
 
         .tarjeta-miniatura {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             object-fit: cover;
             border-radius: 8px;
             background-color: #2c2c2c;
@@ -138,7 +138,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN: Reemplaza con tu usuario y repositorio de GitHub
+        // CONFIGURACIÓN: Reemplaza con tu usuario y repositorio de GitHub (ej: "tu-usuario/nombre-repo")
         const GITHUB_REPO = "tu-usuario/tu-repositorio";
 
         async function cargarEntradasDinamicas() {
@@ -162,22 +162,22 @@
                 let htmlTarjetas = '';
 
                 for (const file of htmlFiles) {
-                    // Extraer la fecha del nombre del archivo (ej: 2022-05-18)
+                    // Extraer la fecha del nombre del archivo (Primeros 10 caracteres: YYYY-MM-DD)
                     const fecha = file.name.substring(0, 10);
 
+                    // Extraer el título limpio reemplazando guiones bajos por espacios y quitando la extensión
+                    const nombreLimpio = file.name.replace('.html', '').substring(11); // Quita fecha y guion
+                    const titulo = decodeURIComponent(nombreLimpio.replace(/_/g, ' '));
+
                     try {
-                        // Leer el contenido HTML interno de cada entrada para extraer título y foto reales
+                        // Descargar el contenido interno del HTML de forma ligera para buscar su primera imagen
                         const resHtml = await fetch(`entradas/${file.name}`);
                         const textoHtml = await resHtml.text();
                         
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(textoHtml, 'text/html');
 
-                        // Obtener el título real (busca el <h1> o usa el nombre limpio si no hay)
-                        const h1Tag = doc.querySelector('h1');
-                        const titulo = h1Tag ? h1Tag.textContent : file.name.replace('.html', '').replace(/_/g, ' ');
-
-                        // Obtener la primera imagen de la entrada para la miniatura
+                        // Buscar la primera imagen dentro del artículo para ponerla en la tarjeta
                         const imgTag = doc.querySelector('img');
                         const miniatura = imgTag ? imgTag.src : '';
 
@@ -192,7 +192,16 @@
                             </a>
                         `;
                     } catch (e) {
-                        console.error("Error leyendo archivo:", file.name);
+                        // Si falla la lectura interna de la imagen, muestra la tarjeta igual con título y fecha
+                        htmlTarjetas += `
+                            <a href="entradas/${file.name}" class="tarjeta-entrada">
+                                <div class="tarjeta-info">
+                                    <span class="fecha-entrada">${fecha}</span>
+                                    <h2>${titulo}</h2>
+                                    <p>Haz clic para leer el artículo completo...</p>
+                                </div>
+                            </a>
+                        `;
                     }
                 }
 
@@ -200,7 +209,7 @@
 
             } catch (error) {
                 console.error(error);
-                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente.</p>';
+                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente. Revisa el nombre del repositorio en el código.</p>';
             }
         }
 
