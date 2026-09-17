@@ -139,13 +139,13 @@
 
     <script>
         // CONFIGURACIÓN: Reemplaza con tu usuario y repositorio de GitHub (ej: "tu-usuario/nombre-repo")
-        const GITHUB_REPO = "tu-usuario/tu-repositorio";
+        const GITHUB_REPO = "altimiras/Blog";
 
         async function cargarEntradasDinamicas() {
             const contenedor = document.getElementById('listaEntradas');
             
             try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/entradas`);
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/Entradas`);
                 if (!response.ok) throw new Error('No se pudo conectar con el repositorio.');
                 
                 const files = await response.json();
@@ -182,7 +182,7 @@
                         const miniatura = imgTag ? imgTag.src : '';
 
                         htmlTarjetas += `
-                            <a href="entradas/${file.name}" class="tarjeta-entrada">
+                            <a href="Entradas/${file.name}" class="tarjeta-entrada">
                                 ${miniatura ? `<img src="${miniatura}" class="tarjeta-miniatura" alt="Miniatura">` : ''}
                                 <div class="tarjeta-info">
                                     <span class="fecha-entrada">${fecha}</span>
@@ -194,7 +194,7 @@
                     } catch (e) {
                         // Si falla la lectura interna de la imagen, muestra la tarjeta igual con título y fecha
                         htmlTarjetas += `
-                            <a href="entradas/${file.name}" class="tarjeta-entrada">
+                            <a href="Entradas/${file.name}" class="tarjeta-entrada">
                                 <div class="tarjeta-info">
                                     <span class="fecha-entrada">${fecha}</span>
                                     <h2>${titulo}</h2>
