@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor Masivo de Blogger - Altimiras Chile</title>
+    <title>Conversor Definitivo de Blogger - Altimiras Chile</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -76,18 +76,18 @@
 </head>
 <body>
     <div class="contenedor">
-        <h1>Conversor Masivo de Blogger (Feed Atom / XML)</h1>
-        <p>Selecciona el archivo <strong>feed.atom</strong> que encontraste en tu exportación de Takeout.</p>
+        <h1>Conversor Masivo de Blogger (Feed Atom)</h1>
+        <p>Sube tu archivo <strong>feed.atom</strong> para extraer e indexar todas tus publicaciones correctamente.</p>
 
         <div class="zona-carga">
-            <label for="archivoXml" style="display:block; color: #fff; font-weight: 500; margin-bottom: 10px;">Sube tu archivo feed.atom:</label>
+            <label for="archivoXml" style="display:block; color: #fff; font-weight: 500; margin-bottom: 10px;">Selecciona el archivo feed.atom:</label>
             <input type="file" id="archivoXml" accept=".atom,.xml">
         </div>
 
         <div id="seccionProgreso" class="oculto">
             <p id="estadoCarga" style="color: var(--accent); font-weight: bold;"></p>
             <div class="lista-resultados" id="listaEntradas"></div>
-            <button class="btn-accion" onclick="descargarTodo()">Generar y Descargar Todas las Entradas e Índice</button>
+            <button class="btn-accion" onclick="procesarYDescargar()">Generar Archivos del Blog</button>
         </div>
     </div>
 
@@ -100,13 +100,12 @@
 
             const lector = new FileReader();
             lector.onload = function(e) {
-                const contenidoXml = e.target.result;
-                parsearXmlBlogger(contenidoXml);
+                parsearAtomBlogger(e.target.result);
             };
             lector.readAsText(archivo);
         });
 
-        function parsearXmlBlogger(xmlTexto) {
+        function parsearAtomBlogger(xmlTexto) {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlTexto, "text/xml");
             
@@ -114,48 +113,68 @@
             entradasProcesadas = [];
 
             for (let entry of entries) {
+                // Verificar que la entrada sea un post de blog analizando sus categorías o ID
+                let esPost = false;
+                const categories = entry.getElementsByTagName('category');
+                for (let cat of categories) {
+                    const term = cat.getAttribute('term') || '';
+                    if (term.includes('post')) {
+                        esPost = true;
+                        break;
+                    }
+                }
+
+                // Si no tiene categoría explícita pero tiene ID de post y título, lo aceptamos
+                const idNode = entry.getElementsByTagName('id')[0];
                 const titleNode = entry.getElementsByTagName('title')[0];
                 const contentNode = entry.getElementsByTagName('content')[0];
-                const publishedNode = entry.getElementsByTagName('published')[0] || entry.getElementsByTagName('issued')[0];
 
                 if (titleNode && contentNode) {
-                    const titulo = titleNode.textContent;
-                    const contenidoHtml = contentNode.textContent;
-                    const fechaCruda = publishedNode ? publishedNode.textContent : '';
-                    
-                    let fechaLegible = "Reciente";
-                    if (fechaCruda) {
-                        const d = new Date(fechaCruda);
-                        if (!isNaN(d)) {
-                            fechaLegible = d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const idTexto = idNode ? idNode.textContent : '';
+                    if (idTexto.includes('post') || esPost || entries.length < 10) {
+                        const titulo = titleNode.textContent;
+                        const contenidoHtml = contentNode.textContent;
+                        
+                        // Ignorar si el título está vacío o es una página del sistema
+                        if (!titulo.trim()) return;
+
+                        const publishedNode = entry.getElementsByTagName('published')[0] || entry.getElementsByTagName('issued')[0];
+                        const fechaCruda = publishedNode ? publishedNode.textContent : '';
+                        
+                        let fechaLegible = "Reciente";
+                        if (fechaCruda) {
+                            const d = new Date(fechaCruda);
+                            if (!isNaN(d)) {
+                                fechaLegible = d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                            }
                         }
+
+                        // Extraer primera imagen
+                        let imagenUrl = "";
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = contenidoHtml;
+                        const primeraImg = tempDiv.querySelector('img');
+                        if (primeraImg) {
+                            imagenUrl = primeraImg.src;
+                        }
+
+                        const textoPlano = tempDiv.textContent || tempDiv.innerText || "";
+                        const descripcion = textoPlano.substring(0, 120) + "...";
+
+                        const slug = titulo.toLowerCase()
+                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[^a-z0-9]/g, '-')
+                            .replace(/-+/g, '-');
+
+                        entradasProcesadas.push({
+                            titulo: titulo,
+                            fecha: fechaLegible,
+                            contenido: contenidoHtml,
+                            imagen: imagenUrl,
+                            descripcion: descripcion,
+                            nombreArchivo: slug + ".html"
+                        });
                     }
-
-                    // Extraer primera imagen
-                    let imagenUrl = "";
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = contenidoHtml;
-                    const primeraImg = tempDiv.querySelector('img');
-                    if (primeraImg) {
-                        imagenUrl = primeraImg.src;
-                    }
-
-                    const textoPlano = tempDiv.textContent || tempDiv.innerText || "";
-                    const descripcion = textoPlano.substring(0, 120) + "...";
-
-                    const slug = titulo.toLowerCase()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                        .replace(/[^a-z0-9]/g, '-')
-                        .replace(/-+/g, '-');
-
-                    entradasProcesadas.push({
-                        titulo: titulo,
-                        fecha: fechaLegible,
-                        contenido: contenidoHtml,
-                        imagen: imagenUrl,
-                        descripcion: descripcion,
-                        nombreArchivo: slug + ".html"
-                    });
                 }
             }
 
@@ -164,7 +183,7 @@
             const estado = document.getElementById('estadoCarga');
 
             seccion.classList.remove('oculto');
-            estado.textContent = `¡Se encontraron ${entradasProcesadas.length} entradas en el archivo Atom!`;
+            estado.textContent = `¡Se detectaron ${entradasProcesadas.length} entradas válidas!`;
             
             lista.innerHTML = '';
             entradasProcesadas.forEach((item, index) => {
@@ -172,9 +191,10 @@
             });
         }
 
-        function descargarTodo() {
+        function procesarYDescargar() {
             if (entradasProcesadas.length === 0) return;
 
+            // 1. Generar el index.html
             let htmlIndex = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -214,6 +234,7 @@
                 <p>${entrada.descripcion}</p>
             </a>`;
 
+                // Generar archivo individual de la entrada
                 const htmlArticulo = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -269,7 +290,7 @@
                 linkIdx.href = URL.createObjectURL(blobIdx);
                 linkIdx.download = 'index.html';
                 linkIdx.click();
-                alert("¡Listo! Se han procesado todas las entradas desde tu archivo feed.atom.");
+                alert("¡Proceso completado! Se han descargado todas las entradas encontradas y el archivo index.html.");
             }, 1000);
         }
     </script>
