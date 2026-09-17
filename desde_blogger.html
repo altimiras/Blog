@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Título de la Entrada - Altimiras Chile</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-muted: #9e9e9e;
+            --accent: #d4af37;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .contenedor-articulo {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .volver {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+
+        .volver:hover {
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 1.5rem + 1vw, 2.4rem);
+            color: #ffffff;
+            margin-top: 0;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .fecha {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .contenido p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .contenido img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="contenedor-articulo">
+        <!-- Enlace para volver al listado principal del blog -->
+        <a href="index.html" class="volver">&larr; Volver al índice</a>
+
+        <article>
+            <h1>Título de tu entrada de Blogger</h1>
+            <div class="fecha">Publicado el 17 de septiembre de 2026</div>
+
+            <div class="contenido">
+                <!-- Aquí pegas el contenido que traigas de Blogger -->
+                <p>Aquí irá el primer párrafo de tu artículo o memoria. Al usar esta estructura, el texto se adaptará automáticamente a la lectura cómoda en modo oscuro.</p>
+                <p>Puedes agregar tantas etiquetas de párrafo como necesites o incluso tus imágenes dentro de la carpeta local.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Altimiras Chile</p>
+    </footer>
+
+</body>
+</html>
