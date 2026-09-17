@@ -34,18 +34,6 @@
             padding-bottom: 20px;
         }
 
-        .volver-inicio {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        .volver-inicio:hover {
-            opacity: 0.8;
-        }
-
         h1 {
             font-size: clamp(2rem, 1.5rem + 1vw, 2.5rem);
             color: #ffffff;
@@ -58,7 +46,7 @@
             font-size: 1.05rem;
         }
 
-        /* Lista de entradas */
+        /* Lista de entradas dinámica */
         .lista-entradas {
             display: flex;
             flex-direction: column;
@@ -100,6 +88,13 @@
             margin: 0;
         }
 
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 20px;
+        }
+
         footer {
             text-align: center;
             margin-top: 60px;
@@ -114,27 +109,74 @@
 
     <div class="contenedor">
         <header>
-            <!-- Enlace para volver a tu página principal general -->
-            <a href="https://altimiras.github.io/" class="volver-inicio">&larr; Volver al sitio principal</a>
             <h1>Genealogía y Blog</h1>
             <p>Temas de interés, relatos y memorias ordenadas cronológicamente.</p>
         </header>
 
-        <main class="lista-entradas">
-            <!-- Cada entrada nueva que agregues será una tarjeta como esta -->
-            <a href="Entradas/desde_blogger.html" class="tarjeta-entrada">
-                <span class="fecha-entrada">17 de septiembre, 2026</span>
-                <h2>Mi primera entrada desde Blogger</h2>
-                <p>Un breve resumen o introducción de lo que trata este artículo para invitar a la lectura...</p>
-            </a>
-
-            <!-- Aquí irás sumando más tarjetas hacia abajo en el futuro -->
+        <main id="listaEntradas" class="lista-entradas">
+            <div class="loading">Cargando entradas desde el repositorio...</div>
         </main>
 
         <footer>
             <p>&copy; 2026 Altimiras Chile</p>
         </footer>
     </div>
+
+    <script>
+        // CONFIGURACIÓN: Reemplaza esto con tu usuario y el nombre de tu repositorio en GitHub
+        const GITHUB_REPO = "tu-usuario/tu-repositorio"; 
+
+        async function cargarEntradasDinamicas() {
+            const contenedor = document.getElementById('listaEntradas');
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/entradas`);
+                if (!response.ok) throw new Error('No se pudo conectar con el repositorio.');
+                
+                const files = await response.json();
+                
+                // Filtrar solo los archivos que terminan en .html
+                const htmlFiles = files.filter(file => file.name && file.name.endsWith('.html'));
+                
+                if (htmlFiles.length === 0) {
+                    contenedor.innerHTML = '<p class="loading">No hay entradas disponibles por el momento.</p>';
+                    return;
+                }
+
+                // Ordenar de más reciente a más antiguo basándose en el nombre (ej: 2022-05-18_...)
+                htmlFiles.sort((a, b) => b.name.localeCompare(a.name));
+
+                let htmlTarjetas = '';
+
+                htmlFiles.forEach(file => {
+                    // Extraer fecha y título del nombre del archivo (Formato: YYYY-MM-DD_titulo_de_prueba.html)
+                    const cleanName = file.name.replace('.html', '');
+                    const parts = cleanName.split('_');
+                    const fecha = parts[0] || 'Fecha desconocida';
+                    
+                    // Reconstruir el título legible a partir del resto del nombre del archivo
+                    const slugTitulo = parts.slice(1).join(' ');
+                    const titulo = slugTitulo ? slugTitulo.charAt(0).toUpperCase() + slugTitulo.slice(1).replace(/_/g, ' ') : cleanName;
+
+                    htmlTarjetas += `
+                        <a href="entradas/${file.name}" class="tarjeta-entrada">
+                            <span class="fecha-entrada">${fecha}</span>
+                            <h2>${titulo}</h2>
+                            <p>Haz clic para leer el artículo completo...</p>
+                        </a>
+                    `;
+                });
+
+                contenedor.innerHTML = htmlTarjetas;
+
+            } catch (error) {
+                console.error(error);
+                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente.</p>';
+            }
+        }
+
+        cargarEntradasDinamicas();
+    </script>
 
 </body>
 </html>
