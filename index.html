@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genealogía y Blog - Altimiras Chile</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-muted: #9e9e9e;
+            --accent: #d4af37;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .contenedor {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .volver-inicio {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .volver-inicio:hover {
+            opacity: 0.8;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 1.5rem + 1vw, 2.5rem);
+            color: #ffffff;
+            margin: 0 0 10px 0;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        /* Lista de entradas */
+        .lista-entradas {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tarjeta-entrada {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .tarjeta-entrada:hover {
+            transform: translateY(-3px);
+            background-color: #252525;
+            border-color: #444444;
+        }
+
+        .tarjeta-entrada h2 {
+            font-size: 1.35rem;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+        }
+
+        .fecha-entrada {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .tarjeta-entrada p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor">
+        <header>
+            <!-- Enlace para volver a tu página principal general -->
+            <a href="https://altimiras.github.io/" class="volver-inicio">&larr; Volver al sitio principal</a>
+            <h1>Genealogía y Blog</h1>
+            <p>Temas de interés, relatos y memorias ordenadas cronológicamente.</p>
+        </header>
+
+        <main class="lista-entradas">
+            <!-- Cada entrada nueva que agregues será una tarjeta como esta -->
+            <a href="entradas/desde_blogger.html" class="tarjeta-entrada">
+                <span class="fecha-entrada">17 de septiembre, 2026</span>
+                <h2>Mi primera entrada desde Blogger</h2>
+                <p>Un breve resumen o introducción de lo que trata este artículo para invitar a la lectura...</p>
+            </a>
+
+            <!-- Aquí irás sumando más tarjetas hacia abajo en el futuro -->
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Altimiras Chile</p>
+        </footer>
+    </div>
+
+</body>
+</html>
