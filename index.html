@@ -137,8 +137,8 @@
         </footer>
     </div>
 
-    <script>
-        // CONFIGURACIÓN: Reemplaza con tu usuario y repositorio de GitHub (ej: "tu-usuario/nombre-repo")
+    <    <script>
+        // CONFIGURACIÓN: Tu repositorio actual
         const GITHUB_REPO = "altimiras/Blog";
 
         async function cargarEntradasDinamicas() {
@@ -166,50 +166,47 @@
                     const fecha = file.name.substring(0, 10);
 
                     // Extraer el título limpio reemplazando guiones bajos por espacios y quitando la extensión
-                    const nombreLimpio = file.name.replace('.html', '').substring(11); // Quita fecha y guion
+                    const nombreLimpio = file.name.replace('.html', '').substring(11); 
                     const titulo = decodeURIComponent(nombreLimpio.replace(/_/g, ' '));
 
+                    let miniatura = '';
+
                     try {
-                        // Descargar el contenido interno del HTML de forma ligera para buscar su primera imagen
-                        const resHtml = await fetch(`entradas/${file.name}`);
+                        // CORREGIDO: Apunta exactamente a la carpeta con 'E' mayúscula
+                        const resHtml = await fetch(`Entradas/${file.name}`);
                         const textoHtml = await resHtml.text();
                         
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(textoHtml, 'text/html');
 
-                        // Buscar la primera imagen dentro del artículo para ponerla en la tarjeta
+                        // Buscar la primera imagen dentro del artículo
                         const imgTag = doc.querySelector('img');
-                        const miniatura = imgTag ? imgTag.src : '';
-
-                        htmlTarjetas += `
-                            <a href="Entradas/${file.name}" class="tarjeta-entrada">
-                                ${miniatura ? `<img src="${miniatura}" class="tarjeta-miniatura" alt="Miniatura">` : ''}
-                                <div class="tarjeta-info">
-                                    <span class="fecha-entrada">${fecha}</span>
-                                    <h2>${titulo}</h2>
-                                    <p>Haz clic para leer el artículo completo...</p>
-                                </div>
-                            </a>
-                        `;
+                        if (imgTag) {
+                            miniatura = imgTag.getAttribute('src');
+                        }
                     } catch (e) {
-                        // Si falla la lectura interna de la imagen, muestra la tarjeta igual con título y fecha
-                        htmlTarjetas += `
-                            <a href="Entradas/${file.name}" class="tarjeta-entrada">
-                                <div class="tarjeta-info">
-                                    <span class="fecha-entrada">${fecha}</span>
-                                    <h2>${titulo}</h2>
-                                    <p>Haz clic para leer el artículo completo...</p>
-                                </div>
-                            </a>
-                        `;
+                        console.error("No se pudo extraer la imagen de:", file.name);
                     }
+
+                    // Renderizar la tarjeta incluyendo la miniatura si se encontró
+                    htmlTarjetas += `
+                        <a href="Entradas/${file.name}" class="tarjeta-entrada">
+                            ${miniatura ? `<img src="${miniatura}" class="tarjeta-miniatura" alt="Miniatura">` : ''}
+                            <div class="tarjeta-info">
+                                <span class="fecha-entrada">${fecha}</span>
+                                &&
+                                <h2>${titulo}</h2>
+                                <p>Haz clic para leer el artículo completo...</p>
+                            </div>
+                        </a>
+                    `;
                 }
 
                 contenedor.innerHTML = htmlTarjetas;
 
             } catch (error) {
                 console.error(error);
-                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente. Revisa el nombre del repositorio en el código.</p>';
+                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente.</p>';
             }
         }
 
