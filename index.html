@@ -137,7 +137,7 @@
         </footer>
     </div>
 
-    <    <script>
+    <script>
         // CONFIGURACIÓN: Tu repositorio actual
         const GITHUB_REPO = "altimiras/Blog";
 
@@ -172,7 +172,6 @@
                     let miniatura = '';
 
                     try {
-                        // CORREGIDO: Apunta exactamente a la carpeta con 'E' mayúscula
                         const resHtml = await fetch(`Entradas/${file.name}`);
                         const textoHtml = await resHtml.text();
                         
@@ -182,7 +181,13 @@
                         // Buscar la primera imagen dentro del artículo
                         const imgTag = doc.querySelector('img');
                         if (imgTag) {
-                            miniatura = imgTag.getAttribute('src');
+                            let srcOriginal = imgTag.getAttribute('src');
+                            // Si la ruta es relativa y no empieza con http o una barra, ajustarla a la carpeta Entradas/
+                            if (srcOriginal && !srcOriginal.startsWith('http') && !srcOriginal.startsWith('/')) {
+                                miniatura = `Entradas/${srcOriginal}`;
+                            } else {
+                                miniatura = srcOriginal;
+                            }
                         }
                     } catch (e) {
                         console.error("No se pudo extraer la imagen de:", file.name);
@@ -194,7 +199,6 @@
                             ${miniatura ? `<img src="${miniatura}" class="tarjeta-miniatura" alt="Miniatura">` : ''}
                             <div class="tarjeta-info">
                                 <span class="fecha-entrada">${fecha}</span>
-                                &&
                                 <h2>${titulo}</h2>
                                 <p>Haz clic para leer el artículo completo...</p>
                             </div>
