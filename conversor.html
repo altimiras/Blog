@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor Masivo de Blogger a GitHub - Altimiras Chile</title>
+    <title>Conversor Masivo de Blogger - Altimiras Chile</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -13,16 +13,14 @@
             --text-muted: #9e9e9e;
             --accent: #d4af37;
         }
-
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
             margin: 0;
             padding: 40px 20px;
         }
-
         .contenedor {
             max-width: 800px;
             margin: 0 auto;
@@ -32,17 +30,8 @@
             padding: 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-
-        h1 {
-            color: #ffffff;
-            margin-top: 0;
-            font-size: 1.8rem;
-        }
-
-        p {
-            color: var(--text-muted);
-        }
-
+        h1 { color: #ffffff; margin-top: 0; font-size: 1.8rem; }
+        p { color: var(--text-muted); }
         .zona-carga {
             border: 2px dashed var(--border-color);
             padding: 30px;
@@ -51,12 +40,7 @@
             margin: 25px 0;
             background-color: #161616;
         }
-
-        input[type="file"] {
-            color: var(--text-main);
-            margin-top: 10px;
-        }
-
+        input[type="file"] { color: var(--text-main); margin-top: 10px; }
         .lista-resultados {
             margin-top: 25px;
             max-height: 300px;
@@ -66,7 +50,6 @@
             padding: 15px;
             background-color: #161616;
         }
-
         .item-entrada {
             padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
@@ -75,16 +58,11 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        .item-entrada:last-child {
-            border-bottom: none;
-        }
-
         .btn-accion {
             background-color: var(--accent);
             color: #121212;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 1rem;
             font-weight: bold;
             border-radius: 8px;
@@ -92,31 +70,24 @@
             margin-top: 20px;
             width: 100%;
         }
-
-        .btn-accion:hover {
-            opacity: 0.9;
-        }
-
-        .oculto {
-            display: none;
-        }
+        .btn-accion:hover { opacity: 0.9; }
+        .oculto { display: none; }
     </style>
 </head>
 <body>
-
     <div class="contenedor">
-        <h1>Conversor de Respaldo de Blogger</h1>
-        <p>Selecciona el archivo <strong>.xml</strong> que descargaste de las copias de seguridad de Blogger para transformarlo al formato oscuro de tu sitio.</p>
+        <h1>Conversor Masivo de Blogger (Feed Atom / XML)</h1>
+        <p>Selecciona el archivo <strong>feed.atom</strong> que encontraste en tu exportación de Takeout.</p>
 
         <div class="zona-carga">
-            <label for="archivoXml" style="display:block; color: #fff; font-weight: 500; margin-bottom: 10px;">Sube tu archivo XML de Blogger:</label>
-            <input type="file" id="archivoXml" accept=".xml">
+            <label for="archivoXml" style="display:block; color: #fff; font-weight: 500; margin-bottom: 10px;">Sube tu archivo feed.atom:</label>
+            <input type="file" id="archivoXml" accept=".atom,.xml">
         </div>
 
         <div id="seccionProgreso" class="oculto">
             <p id="estadoCarga" style="color: var(--accent); font-weight: bold;"></p>
             <div class="lista-resultados" id="listaEntradas"></div>
-            <button class="btn-accion" onclick="descargarTodo()">Generar Archivo de Índice y Procesar</button>
+            <button class="btn-accion" onclick="descargarTodo()">Generar y Descargar Todas las Entradas e Índice</button>
         </div>
     </div>
 
@@ -139,31 +110,19 @@
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlTexto, "text/xml");
             
-            // Blogger guarda las entradas como elementos <entry>
             const entries = xmlDoc.getElementsByTagName('entry');
             entradasProcesadas = [];
 
             for (let entry of entries) {
-                // Verificamos que sea una entrada de tipo post y no un comentario o página estática
-                const categories = entry.getElementsByTagName('category');
-                let esPost = false;
-                for (let cat of categories) {
-                    if (cat.getAttribute('term') && cat.getAttribute('term').includes('#post')) {
-                        esPost = true;
-                        break;
-                    }
-                }
-                // Si no tiene la categoría explícita pero tiene contenido y título, lo tomamos igual por seguridad
                 const titleNode = entry.getElementsByTagName('title')[0];
                 const contentNode = entry.getElementsByTagName('content')[0];
-                const publishedNode = entry.getElementsByTagName('published')[0];
+                const publishedNode = entry.getElementsByTagName('published')[0] || entry.getElementsByTagName('issued')[0];
 
                 if (titleNode && contentNode) {
                     const titulo = titleNode.textContent;
                     const contenidoHtml = contentNode.textContent;
                     const fechaCruda = publishedNode ? publishedNode.textContent : '';
                     
-                    // Formatear fecha legible
                     let fechaLegible = "Reciente";
                     if (fechaCruda) {
                         const d = new Date(fechaCruda);
@@ -172,7 +131,7 @@
                         }
                     }
 
-                    // Extraer la primera imagen que encuentre en el HTML de Blogger (si existe)
+                    // Extraer primera imagen
                     let imagenUrl = "";
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = contenidoHtml;
@@ -181,14 +140,12 @@
                         imagenUrl = primeraImg.src;
                     }
 
-                    // Limpiar un poco el texto para sacar una breve descripción
                     const textoPlano = tempDiv.textContent || tempDiv.innerText || "";
                     const descripcion = textoPlano.substring(0, 120) + "...";
 
-                    // Generar un nombre de archivo limpio basado en el título
                     const slug = titulo.toLowerCase()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes
-                        .replace(/[^a-z0-9]/g, '-') // reemplazar símbolos por guiones
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9]/g, '-')
                         .replace(/-+/g, '-');
 
                     entradasProcesadas.push({
@@ -202,13 +159,12 @@
                 }
             }
 
-            // Mostrar resumen en pantalla
             const seccion = document.getElementById('seccionProgreso');
             const lista = document.getElementById('listaEntradas');
             const estado = document.getElementById('estadoCarga');
 
             seccion.classList.remove('oculto');
-            estado.textContent = `¡Se encontraron ${entradasProcesadas.length} entradas en tu archivo de Blogger!`;
+            estado.textContent = `¡Se encontraron ${entradasProcesadas.length} entradas en el archivo Atom!`;
             
             lista.innerHTML = '';
             entradasProcesadas.forEach((item, index) => {
@@ -219,7 +175,6 @@
         function descargarTodo() {
             if (entradasProcesadas.length === 0) return;
 
-            // Generar el código del index.html con todas las entradas listadas
             let htmlIndex = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -251,7 +206,6 @@
         </header>
         <main class="lista-entradas">`;
 
-            // Crear y descargar de forma individual o generar el listado
             entradasProcesadas.forEach(entrada => {
                 htmlIndex += `
             <a href="entradas/${entrada.nombreArchivo}" class="tarjeta-entrada">
@@ -260,7 +214,6 @@
                 <p>${entrada.descripcion}</p>
             </a>`;
 
-                // Generar el HTML de cada artículo individual con la estética oscura
                 const htmlArticulo = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -296,7 +249,6 @@
 </body>
 </html>`;
 
-                // Descargar archivo de entrada individual automáticamente
                 const blobArt = new Blob([htmlArticulo], { type: 'text/html' });
                 const linkArt = document.createElement('a');
                 linkArt.href = URL.createObjectURL(blobArt);
@@ -311,14 +263,13 @@
 </body>
 </html>`;
 
-            // Descargar el index.html principal del blog
             setTimeout(() => {
                 const blobIdx = new Blob([htmlIndex], { type: 'text/html' });
                 const linkIdx = document.createElement('a');
                 linkIdx.href = URL.createObjectURL(blobIdx);
                 linkIdx.download = 'index.html';
                 linkIdx.click();
-                alert("¡Proceso finalizado! Se han generado y descargado el archivo index.html y todas las entradas de tu blog listas para subir a GitHub.");
+                alert("¡Listo! Se han procesado todas las entradas desde tu archivo feed.atom.");
             }, 1000);
         }
     </script>
