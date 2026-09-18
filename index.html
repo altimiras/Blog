@@ -217,5 +217,109 @@
         cargarEntradasDinamicas();
     </script>
 
+    <script>
+        // CONFIGURACIÓN: Tu repositorio actual
+        const GITHUB_REPO = "altimiras/Blog";
+
+        async function cargarEntradasDinamicas() {
+            const contenedor = document.getElementById('listaEntradas');
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/Entradas`);
+                if (!response.ok) throw new Error('No se pudo conectar con el repositorio.');
+                
+                const files = await response.json();
+                const htmlFiles = files.filter(file => file.name && file.name.endsWith('.html'));
+                
+                if (htmlFiles.length === 0) {
+                    contenedor.innerHTML = '<p class="loading">No hay entradas disponibles.</p>';
+                    return;
+                }
+
+                // Ordenar de más reciente a más antiguo por nombre de archivo
+                htmlFiles.sort((a, b) => b.name.localeCompare(a.name));
+
+                let htmlTarjetas = '';
+
+                for (const file of htmlFiles) {
+                    // Nombre limpio sin la extensión .html
+                    const nombreSinExt = file.name.replace('.html', '');
+                    
+                    // Encontrar el primer guion bajo para separar la fecha del título de forma exacta
+                    const primerGuion = nombreSinExt.indexOf('_');
+                    
+                    let fecha = '';
+                    let tituloCrudo = '';
+
+                    if (primerGuion !== -1) {
+                        fecha = nombreSinExt.substring(0, primerGuion);
+                        tituloCrudo = nombreSinExt.substring(primerGuion + 1);
+                    } else {
+                        fecha = 'Reciente';
+                        tituloCrudo = nombreSinExt;
+                    }
+
+                    // Reemplazar guiones bajos por espacios y decodificar caracteres especiales
+                    const titulo = decodeURIComponent(tituloCrudo.replace(/_/g, ' '));
+
+                    let miniatura = '';
+
+                    try {
+                        const resHtml = await fetch(`Entradas/${file.name}`);
+                        const textoHtml = await resHtml.text();
+                        
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(textoHtml, 'text/html');
+
+                        // Buscar la primera imagen dentro del artículo
+                        const imgTag = doc.querySelector('img');
+                        if (imgTag) {
+                            let srcOriginal = imgTag.getAttribute('src');
+                            if (srcOriginal && !srcOriginal.startsWith('http') && !srcOriginal.startsWith('/')) {
+                                miniatura = `Entradas/${srcOriginal}`;
+                            } else {
+                                miniatura = srcOriginal;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("No se pudo extraer la imagen de:", file.name);
+                    }
+
+                    // Renderizar la tarjeta incluyendo la miniatura si se encontró
+                    htmlTarjetas += `
+                        <a href="Entradas/${file.name}" class="tarjeta-entrada">
+                            ${miniatura ? `<img src="${miniatura}" class="tarjeta-miniatura" alt="Miniatura">` : ''}
+                            <div class="tarjeta-info">
+                                <span class="fecha-entrada">${fecha}</span>
+                                <h2>${titulo}</h2>
+                                <p>Haz clic para leer el artículo completo...</p>
+                            </div>
+                        </a>
+                    `;
+                }
+
+                contenedor.innerHTML = htmlTarjetas;
+
+            } catch (error) {
+                console.error(error);
+                contenedor.innerHTML = '<p class="loading" style="color: #c5221f;">Error al cargar las entradas dinámicamente.</p>';
+            }
+        }
+
+        cargarEntradasDinamicas();
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+    
+
 </body>
 </html>
